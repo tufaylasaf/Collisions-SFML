@@ -7,8 +7,6 @@ int main()
 {
     const uint64_t WIDTH = 1000;
     const uint64_t HEIGHT = 1000;
-    const uint32_t grid_width = WIDTH / 100;   // Update for larger grid cells
-    const uint32_t grid_height = HEIGHT / 100; // Update for larger grid cells
 
     sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML Grid and Bodies");
 

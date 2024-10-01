@@ -1,6 +1,7 @@
 #include "body.cpp"
 #include "spatialHashing.cpp"
 #include <vector>
+#include <map>
 #include <cmath>
 
 struct Solver
