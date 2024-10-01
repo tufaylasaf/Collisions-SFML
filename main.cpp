@@ -7,9 +7,12 @@ int main()
 {
     const uint64_t WIDTH = 1000;
     const uint64_t HEIGHT = 1000;
-    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML Circle");
+    const uint32_t grid_width = WIDTH / 100;   // Update for larger grid cells
+    const uint32_t grid_height = HEIGHT / 100; // Update for larger grid cells
 
-    Solver solver = Solver(sf::Vector2f(WIDTH, HEIGHT), 475);
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML Grid and Bodies");
+
+    Solver solver = Solver(sf::Vector2f(WIDTH, HEIGHT), 475, 10000);
 
     sf::Clock clock;
 
@@ -20,7 +23,7 @@ int main()
     float avgFPS = 0.0f;
 
     sf::CircleShape circle{1.0f};
-    circle.setPointCount(32);
+    circle.setPointCount(16);
     circle.setOrigin(1.0f, 1.0f);
 
     while (window.isOpen())
@@ -35,13 +38,16 @@ int main()
         float dt = clock.restart().asSeconds();
 
         timeSinceLastSpawn += dt;
-
-        if (avgFPS > 60.0f)
+        if (avgFPS >= 60)
+        {
             solver.spawnBodyFromCenter(spawnInterval, timeSinceLastSpawn, dt);
-
-        solver.update(1 / 30.0f);
+        }
+        solver.update(1 / 30.0f, window);
 
         window.clear(sf::Color::Black);
+        solver.spatialGrid.renderGrid(window);
+
+        // Render bodies
         for (Body &b : solver.bodies)
         {
             circle.setPosition(b.position);
@@ -49,6 +55,7 @@ int main()
             circle.setFillColor(b.color);
             window.draw(circle);
         }
+
         window.display();
 
         frameCount++;
