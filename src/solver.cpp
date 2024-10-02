@@ -14,7 +14,7 @@ struct Solver
     static constexpr double PI = 3.14159265358979323846;
     float speed = 100.0f;
     const uint64_t subSteps = 8;
-    const float bRadius = 6.0f;
+    const float bRadius = 8.0f;
 
     // Spatial Grid
     float grid_size = bRadius * 2;
@@ -62,11 +62,11 @@ struct Solver
 
     void spawnBodyFromCenter(float spawnInterval, float &timeSinceLastSpawn, float dt)
     {
-        float angle = 2.25f * PI;
+        // float angle = 2.25f * PI;
         if (timeSinceLastSpawn >= spawnInterval)
         {
-            Body &b = addBody(bRadius, getRainbow(), center + sf::Vector2f(-center.x * 0.75f, -center.y * 0.75f));
-            // float angle = sin(time / 4) + PI * 0.5f;
+            Body &b = addBody(bRadius, getRainbow(), center + sf::Vector2f(0, -center.y * 0.75f));
+            float angle = sin(time / 4) + PI * 0.5f;
             b.setVelocity(speed * sf::Vector2f{static_cast<float>(cos(angle)), static_cast<float>(sin(angle))}, dt);
 
             timeSinceLastSpawn = 0.0f;
@@ -91,11 +91,11 @@ struct Solver
 
         for (uint64_t i{subSteps}; i--;)
         {
-            applyGravity(subDt);
             checkCollision(subDt);
             applyConstraint(window);
             updateBodies(subDt);
         }
+        applyGravity(dt);
     }
 
     void updateBodies(float dt)
@@ -116,40 +116,30 @@ struct Solver
 
     void applyConstraint(const sf::RenderWindow &window)
     {
-        // Get window dimensions
-        const float windowWidth = window.getSize().x;
-        const float windowHeight = window.getSize().y;
-
-        // Apply damping factor to simulate energy loss during a bounce
-        const float damping = 0.75f; // Adjust for more or less energy loss
         for (Body &b : bodies)
         {
-            // Handle left and right boundaries
-            if (b.position.x - b.radius < 0) // Left boundary
+            // Get window dimensions
+            const float windowWidth = window.getSize().x;
+            const float windowHeight = window.getSize().y;
+
+            // Check left and right boundaries
+            if (b.position.x - b.radius < 0)
             {
-                float overstep = b.radius - b.position.x;
-                b.position.x = b.radius;                                                         // Snap position to the boundary
-                b.position_last.x = b.position.x + (b.position_last.x - b.position.x) * damping; // Reverse position_last to reflect velocity change
+                b.position.x = b.radius; // Constrain to left boundary
             }
-            else if (b.position.x + b.radius > windowWidth) // Right boundary
+            else if (b.position.x + b.radius > windowWidth)
             {
-                float overstep = b.position.x + b.radius - windowWidth;
-                b.position.x = windowWidth - b.radius;                                           // Snap position to the boundary
-                b.position_last.x = b.position.x + (b.position_last.x - b.position.x) * damping; // Reverse position_last
+                b.position.x = windowWidth - b.radius; // Constrain to right boundary
             }
 
-            // Handle top and bottom boundaries
-            if (b.position.y - b.radius < 0) // Top boundary
+            // Check top and bottom boundaries
+            if (b.position.y - b.radius < 0)
             {
-                float overstep = b.radius - b.position.y;
-                b.position.y = b.radius;                                                         // Snap position to the boundary
-                b.position_last.y = b.position.y + (b.position_last.y - b.position.y) * damping; // Reverse position_last
+                b.position.y = b.radius; // Constrain to top boundary
             }
-            else if (b.position.y + b.radius > windowHeight) // Bottom boundary
+            else if (b.position.y + b.radius > windowHeight)
             {
-                float overstep = b.position.y + b.radius - windowHeight;
-                b.position.y = windowHeight - b.radius;                                          // Snap position to the boundary
-                b.position_last.y = b.position.y + (b.position_last.y - b.position.y) * damping; // Reverse position_last
+                b.position.y = windowHeight - b.radius; // Constrain to bottom boundary
             }
         }
     }
@@ -169,7 +159,7 @@ struct Solver
             Body &b1 = bodies[i];
 
             // Query the grid for nearby objects
-            spatialGrid.query(positions, i, b1.radius * 2.0f);
+            spatialGrid.query(positions, i, b1.radius * 3.0f);
 
             // Iterate through the query results to check for collisions
             const std::vector<int> &results = spatialGrid.getQueryResults();

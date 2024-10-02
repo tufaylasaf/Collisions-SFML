@@ -5,12 +5,12 @@
 
 int main()
 {
-    const uint64_t WIDTH = 1000;
-    const uint64_t HEIGHT = 1000;
+    const uint64_t WIDTH = 1280;
+    const uint64_t HEIGHT = 720;
 
     sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML Grid and Bodies");
 
-    Solver solver = Solver(sf::Vector2f(WIDTH, HEIGHT), 475, 10000);
+    Solver solver = Solver(sf::Vector2f(WIDTH, HEIGHT), 475, 2500);
 
     sf::Clock clock;
 

@@ -3,15 +3,16 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <cmath>
 
 struct Body
 {
     float radius;
     sf::Color color;
-    // sf::CircleShape shape;
     sf::Vector2f position;
     sf::Vector2f position_last;
     sf::Vector2f acc;
+    float maxSpeed = 125.0f;
 
     Body() = default;
 
@@ -21,7 +22,18 @@ struct Body
 
     void update(float dt)
     {
-        const sf::Vector2f displacement = position - position_last;
+        sf::Vector2f displacement = position - position_last;
+
+        sf::Vector2f velocity = displacement / dt;
+
+        float speed = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+
+        if (speed > maxSpeed)
+        {
+
+            velocity = (velocity / speed) * maxSpeed;
+            displacement = velocity * dt;
+        }
 
         position_last = position;
         position = position + displacement + acc * (dt * dt);
@@ -29,12 +41,15 @@ struct Body
         acc = sf::Vector2f(0, 0);
     }
 
-    void applyForce(sf::Vector2f force) { acc += force; }
+    void applyForce(sf::Vector2f force)
+    {
+        acc += force;
+    }
 
     void setVelocity(sf::Vector2f v, float dt)
     {
         position_last = position - (v * dt);
-    };
+    }
 };
 
 #endif
